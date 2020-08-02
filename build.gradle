@@ -1,5 +1,6 @@
 plugins {
     id 'java-gradle-plugin'
+    id 'maven-publish'
     id 'project-report'
 }
 
@@ -17,6 +18,15 @@ tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
 }
 
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = 'dev.johanness.gradle-helper'
+            implementationClass = 'dev.johanness.gradle_helper.GradleHelperPlugin'
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -25,6 +35,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
     testCompileOnly 'org.jetbrains:annotations:19.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.+'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.+'
 }
 
