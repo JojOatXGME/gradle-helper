@@ -1,0 +1,3 @@
+rootProject.name = 'gradle-helper'
+enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
+enableFeaturePreview("VERSION_ORDERING_V2")

@@ -1,0 +1,19 @@
+# Gradle
+/.gradle/
+/build/
+
+# IntelliJ
+/.idea/*
+!/.idea/codeStyles
+!/.idea/inspectionProfiles
+/out/
+
+# Vim
+.*.sw[nop]
+
+# VS Code
+.vscode/
+
+# Operating Systems
+.DS_Store
+Thumbs.db

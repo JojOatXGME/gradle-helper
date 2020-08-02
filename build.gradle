@@ -1,0 +1,68 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'project-report'
+}
+
+group 'dev.johanness'
+version '0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    withSourcesJar()
+}
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations:19.0.0'
+    testCompileOnly 'org.jetbrains:annotations:19.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.+'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencyLocking {
+    lockAllConfigurations()
+    lockMode = LockMode.STRICT
+}
+
+task resolveAndLockAll {
+    doFirst {
+        if (!gradle.startParameter.writeDependencyLocks) {
+            throw new GradleException(
+                    "Command line flag '--write-locks' must be present.")
+        }
+    }
+    doLast {
+        configurations.findAll {
+            // Add any custom filtering on the configurations to be resolved
+            it.canBeResolved
+        }.each { it.resolve() }
+    }
+}
+
+configurations {
+    all {
+        resolutionStrategy {
+            componentSelection {
+                all { ComponentSelection selection ->
+                    // https://docs.gradle.org/current/userguide/single_versions.html#version_ordering
+                    if (!(selection.candidate.version ==~ /(?i)(\d|release|ga|final|sp|[-._+])+/)) {
+                        selection.reject("Looks like a pre-release")
+                    }
+                }
+            }
+        }
+    }
+}

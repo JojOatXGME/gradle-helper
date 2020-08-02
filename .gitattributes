@@ -1,0 +1,12 @@
+# Keep Gradle wrapper distribution as is
+/gradlew        -text
+/gradlew.bat    -text
+
+# Use CRLF for LICENSE file to make it easy to read in all editors
+/LICENSE        eol=crlf
+
+# Source file configuration
+*.java          diff=java
+
+# Do not show diff for locked dependencies
+/gradle.lockfile -diff
