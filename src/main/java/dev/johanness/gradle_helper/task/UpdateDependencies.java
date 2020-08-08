@@ -6,7 +6,7 @@ import org.gradle.api.Project;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.tasks.TaskAction;
 
-public class ResolveAndLock extends DefaultTask {
+public class UpdateDependencies extends DefaultTask {
   @TaskAction
   void run() {
     Gradle gradle = getProject().getGradle();

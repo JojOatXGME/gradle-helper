@@ -343,11 +343,11 @@ final class GradleHelperPluginTest {
           .rootProject(
               "apply plugin: 'java'\n" +
               "\n" +
-              "assert tasks.findByName('resolveAndLock') == null\n")
+              "assert tasks.findByName('updateDependencies') == null\n")
           .subProject("subproject",
               "apply plugin: 'java'\n" +
               "\n" +
-              "assert tasks.findByName('resolveAndLock') == null\n");
+              "assert tasks.findByName('updateDependencies') == null\n");
 
       GradleRunner.create()
           .withArguments("dependencies", "--write-locks")
@@ -358,10 +358,10 @@ final class GradleHelperPluginTest {
 
       Assertions.assertFalse(Files.exists(tempDir.resolve("gradle.lockfile")) ||
                              Files.exists(tempDir.resolve("gradle/dependency-locks")),
-          "Lockfile of root project was generated");
+          "Lockfile of root project must not be generated");
       Assertions.assertFalse(Files.exists(tempDir.resolve("subproject/gradle.lockfile")) ||
                              Files.exists(tempDir.resolve("gradle/dependency-locks")),
-          "Lockfile of subproject was generated");
+          "Lockfile of subproject must not be generated");
     }
 
     @Test
@@ -380,11 +380,11 @@ final class GradleHelperPluginTest {
           .rootProject(
               "apply plugin: 'java'\n" +
               "\n" +
-              "assert tasks.findByName('resolveAndLock') != null\n")
+              "assert tasks.findByName('updateDependencies') != null\n")
           .subProject("subproject",
               "apply plugin: 'java'\n" +
               "\n" +
-              "assert tasks.findByName('resolveAndLock') == null\n");
+              "assert tasks.findByName('updateDependencies') == null\n");
 
       GradleRunner.create()
           .withArguments(":dependencies", ":subproject:dependencies", "--write-locks")
@@ -395,10 +395,10 @@ final class GradleHelperPluginTest {
 
       Assertions.assertTrue(Files.exists(tempDir.resolve("gradle.lockfile")) ||
                             Files.exists(tempDir.resolve("gradle/dependency-locks")),
-          "Lockfile of root project was not generated");
+          "Lockfile of root project must be generated");
       Assertions.assertTrue(Files.exists(tempDir.resolve("subproject/gradle.lockfile")) ||
                             Files.exists(tempDir.resolve("gradle/dependency-locks")),
-          "Lockfile of subproject was not generated");
+          "Lockfile of subproject must be generated");
     }
 
     @Test
@@ -420,7 +420,7 @@ final class GradleHelperPluginTest {
               "apply plugin: 'java'\n");
 
       GradleRunner.create()
-          .withArguments("resolveAndLock")
+          .withArguments("updateDependencies")
           .withProjectDir(tempDir.toFile())
           .withPluginClasspath()
           .withDebug(true)
@@ -428,10 +428,10 @@ final class GradleHelperPluginTest {
 
       Assertions.assertTrue(Files.exists(tempDir.resolve("gradle.lockfile")) ||
                             Files.exists(tempDir.resolve("gradle/dependency-locks")),
-          "Lockfile of root project was not generated");
+          "Lockfile of root project must be generated");
       Assertions.assertTrue(Files.exists(tempDir.resolve("subproject/gradle.lockfile")) ||
                             Files.exists(tempDir.resolve("gradle/dependency-locks")),
-          "Lockfile of subproject was not generated");
+          "Lockfile of subproject must be generated");
     }
   }
 

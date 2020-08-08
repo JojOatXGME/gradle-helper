@@ -3,7 +3,7 @@ package dev.johanness.gradle_helper;
 import dev.johanness.gradle_helper._internal.DependencyWhitelist;
 import dev.johanness.gradle_helper._internal.ExtensionUtil;
 import dev.johanness.gradle_helper.extension.SettingsExtension;
-import dev.johanness.gradle_helper.task.ResolveAndLock;
+import dev.johanness.gradle_helper.task.UpdateDependencies;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.dsl.LockMode;
@@ -12,14 +12,15 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 public final class GradleHelperPlugin implements Plugin<Settings> {
   private static final @NotNull String EXTENSION_NAME = "gradleHelper";
-  private static final @NotNull String RESOLVE_AND_LOCK_TASK_NAME = "resolveAndLock";
+  private static final @NotNull String UPDATE_DEPENDENCIES_TASK_NAME = "updateDependencies";
 
-  private static final @NotNull Pattern RESOLVE_AND_LOCK_TASK_PATTERN =
-      Pattern.compile(":?" + Pattern.quote(RESOLVE_AND_LOCK_TASK_NAME), Pattern.CASE_INSENSITIVE);
+  private static final @NotNull Pattern UPDATE_DEPENDENCIES_TASK_PATTERN =
+      Pattern.compile(":?" + Pattern.quote(UPDATE_DEPENDENCIES_TASK_NAME), Pattern.CASE_INSENSITIVE);
 
   // The pattern is based on https://docs.gradle.org/current/userguide/single_versions.html#version_ordering
   private static final @NotNull Pattern RELEASED_VERSION_PATTERN =
@@ -32,11 +33,17 @@ public final class GradleHelperPlugin implements Plugin<Settings> {
         SettingsExtension.class,
         settings);
 
-    if (settings.getStartParameter().getTaskNames().stream()
-        .anyMatch(RESOLVE_AND_LOCK_TASK_PATTERN.asMatchPredicate())) {
-      settings.getStartParameter().setWriteDependencyLocks(true);
-      settings.getStartParameter().setRefreshDependencies(true);
-    }
+    settings.getGradle().settingsEvaluated(s -> {
+      if (ExtensionUtil.enableDependencyLocking(extension)) {
+        List<String> taskNames = settings.getStartParameter().getTaskNames();
+        if (taskNames.stream().anyMatch(UPDATE_DEPENDENCIES_TASK_PATTERN.asMatchPredicate())) {
+          // Unfortunately, I guess Gradle does not actually support this use of the API.
+          // It works for now. There are tests that fail when it stops working.
+          settings.getStartParameter().setWriteDependencyLocks(true);
+          settings.getStartParameter().setRefreshDependencies(true);
+        }
+      }
+    });
 
     settings.getGradle().rootProject(p -> rootProject(p, extension));
     settings.getGradle().beforeProject(p -> allProjects(p, extension));
@@ -44,8 +51,8 @@ public final class GradleHelperPlugin implements Plugin<Settings> {
 
   private static void rootProject(@NotNull Project project, @NotNull SettingsExtension extension) {
     if (ExtensionUtil.enableDependencyLocking(extension)) {
-      project.getTasks().register(RESOLVE_AND_LOCK_TASK_NAME, ResolveAndLock.class, task -> {
-        task.setDescription("Resolves and locks the dependencies of all projects");
+      project.getTasks().register(UPDATE_DEPENDENCIES_TASK_NAME, UpdateDependencies.class, task -> {
+        task.setDescription("Resolves and locks the dependencies of all projects in this build");
       });
     }
   }

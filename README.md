@@ -116,8 +116,12 @@ gradleHelper {
 ```
 
 If you enable the feature, the plugin also creates a task named
-`resolveAndLock` on the *root project*. The task can be used to update
-all dependencies.
+`updateDependencies` on the *root project*. The task can be used to
+update all dependencies and write new lockfiles.
+
+```console
+$ ./gradlew updateDependencies
+```
 
 
 [Gradle issue #12538]:
