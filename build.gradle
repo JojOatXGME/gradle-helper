@@ -20,7 +20,7 @@ tasks.withType(Javadoc) {
 
 gradlePlugin {
     plugins {
-        simplePlugin {
+        convention {
             id = 'dev.johanness.gradle-helper'
             implementationClass = 'dev.johanness.gradle_helper.GradleHelperPlugin'
         }

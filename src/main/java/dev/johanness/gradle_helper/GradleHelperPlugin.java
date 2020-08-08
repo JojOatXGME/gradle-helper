@@ -27,7 +27,10 @@ public final class GradleHelperPlugin implements Plugin<Settings> {
 
   @Override
   public void apply(@NotNull Settings settings) {
-    SettingsExtension extension = settings.getExtensions().create(EXTENSION_NAME, SettingsExtension.class);
+    SettingsExtension extension = settings.getExtensions().create(
+        EXTENSION_NAME,
+        SettingsExtension.class,
+        settings);
 
     if (settings.getStartParameter().getTaskNames().stream()
         .anyMatch(RESOLVE_AND_LOCK_TASK_PATTERN.asMatchPredicate())) {
@@ -35,23 +38,12 @@ public final class GradleHelperPlugin implements Plugin<Settings> {
       settings.getStartParameter().setRefreshDependencies(true);
     }
 
-    settings.getGradle().settingsEvaluated(s -> afterEvaluation(s, extension));
     settings.getGradle().rootProject(p -> rootProject(p, extension));
     settings.getGradle().beforeProject(p -> allProjects(p, extension));
   }
 
-  private static void afterEvaluation(@NotNull Settings settings, @NotNull SettingsExtension extension) {
-    if (ExtensionUtil.isDependencyLockingEnabled(extension)) {
-      settings.enableFeaturePreview("ONE_LOCKFILE_PER_PROJECT");
-    }
-
-    if (ExtensionUtil.isDependencyResolutionEnabled(extension)) {
-      settings.enableFeaturePreview("VERSION_ORDERING_V2");
-    }
-  }
-
   private static void rootProject(@NotNull Project project, @NotNull SettingsExtension extension) {
-    if (ExtensionUtil.isDependencyLockingEnabled(extension)) {
+    if (ExtensionUtil.enableDependencyLocking(extension)) {
       project.getTasks().register(RESOLVE_AND_LOCK_TASK_NAME, ResolveAndLock.class, task -> {
         task.setDescription("Resolves and locks the dependencies of all projects");
       });
@@ -59,7 +51,7 @@ public final class GradleHelperPlugin implements Plugin<Settings> {
   }
 
   private static void allProjects(@NotNull Project project, @NotNull SettingsExtension extension) {
-    String defaultJavaEncoding = ExtensionUtil.getDefaultJavaEncoding(extension);
+    String defaultJavaEncoding = ExtensionUtil.defaultJavaEncoding(extension);
     if (defaultJavaEncoding != null) {
       project.getTasks().withType(JavaCompile.class,
           task -> task.getOptions().setEncoding(defaultJavaEncoding));
@@ -67,16 +59,16 @@ public final class GradleHelperPlugin implements Plugin<Settings> {
           task -> task.getOptions().setEncoding(defaultJavaEncoding));
     }
 
-    if (ExtensionUtil.isDependencyLockingEnabled(extension)) {
+    if (ExtensionUtil.enableDependencyLocking(extension)) {
       project.getDependencyLocking().lockAllConfigurations();
-      LockMode lockMode = ExtensionUtil.getDependencyLockingLockMode(extension);
+      LockMode lockMode = ExtensionUtil.dependencyLockingLockMode(extension);
       if (lockMode != null) {
         project.getDependencyLocking().getLockMode().set(lockMode);
       }
     }
 
-    if (ExtensionUtil.isDependencyResolutionEnabled(extension)) {
-      DependencyWhitelist whitelist = ExtensionUtil.getDependencyResolutionWhitelist(extension);
+    if (ExtensionUtil.rejectPreReleases(extension)) {
+      DependencyWhitelist whitelist = ExtensionUtil.dependencyResolutionWhitelist(extension);
       project.getConfigurations().all(configuration -> {
         configuration.getResolutionStrategy().getComponentSelection().all(selection -> {
           if (looksLikePreRelease(selection.getCandidate().getVersion()) &&

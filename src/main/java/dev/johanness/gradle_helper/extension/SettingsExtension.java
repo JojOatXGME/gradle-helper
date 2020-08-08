@@ -1,28 +1,34 @@
 package dev.johanness.gradle_helper.extension;
 
+import dev.johanness.gradle_helper.extension.block.DependencyLocking;
+import dev.johanness.gradle_helper.extension.block.DependencyResolution;
 import org.gradle.api.Action;
-import org.gradle.api.artifacts.dsl.LockMode;
+import org.gradle.api.initialization.Settings;
 import org.gradle.api.model.ObjectFactory;
-import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 
 public class SettingsExtension {
+  private final @NotNull Settings settings;
   private final @NotNull Property<String> defaultJavaEncoding;
   private final @NotNull DependencyLocking dependencyLocking;
   private final @NotNull DependencyResolution dependencyResolution;
 
   @Inject
-  public SettingsExtension(@NotNull ObjectFactory objectFactory) {
+  public SettingsExtension(@NotNull Settings settings, @NotNull ObjectFactory objectFactory) {
+    this.settings = settings;
     defaultJavaEncoding = objectFactory.property(String.class);
     dependencyLocking = objectFactory.newInstance(DependencyLocking.class);
     dependencyResolution = objectFactory.newInstance(DependencyResolution.class);
   }
 
-  public void enableDependencyLocking() {
-    dependencyLocking.getEnabled().set(true);
+  public void useVersionRangesWithDependencyLocking() {
+    dependencyLocking.getEnable().set(true);
+    dependencyResolution.getRejectPreReleases().set(true);
+    settings.enableFeaturePreview("ONE_LOCKFILE_PER_PROJECT");
+    settings.enableFeaturePreview("VERSION_ORDERING_V2");
   }
 
   public @NotNull Property<String> getDefaultJavaEncoding() {
@@ -45,45 +51,4 @@ public class SettingsExtension {
     action.execute(dependencyResolution);
   }
 
-  public static class DependencyLocking {
-    private final @NotNull Property<Boolean> enabled;
-    private final @NotNull Property<LockMode> lockMode;
-
-    @Inject
-    public DependencyLocking(@NotNull ObjectFactory objectFactory) {
-      enabled = objectFactory.property(Boolean.class);
-      lockMode = objectFactory.property(LockMode.class);
-    }
-
-    public @NotNull Property<Boolean> getEnabled() {
-      return enabled;
-    }
-
-    public @NotNull Property<LockMode> getLockMode() {
-      return lockMode;
-    }
-  }
-
-  public static class DependencyResolution {
-    private final @NotNull Property<Boolean> enabled;
-    private final @NotNull ListProperty<String> whitelist;
-
-    @Inject
-    public DependencyResolution(@NotNull ObjectFactory objectFactory) {
-      enabled = objectFactory.property(Boolean.class);
-      whitelist = objectFactory.listProperty(String.class).empty();
-    }
-
-    public @NotNull Property<Boolean> getEnabled() {
-      return enabled;
-    }
-
-    public @NotNull ListProperty<String> getWhitelist() {
-      return whitelist;
-    }
-
-    public void whitelist(@NotNull String pattern) {
-      whitelist.add(pattern);
-    }
-  }
 }
