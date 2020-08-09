@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/exec": "^1.0.4",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.54",
+    "@types/node-fetch": "^2.5.7"
+  }
+}
