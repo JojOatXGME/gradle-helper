@@ -1,0 +1,11 @@
+name: 'Update Gradle'
+description: 'Update Gradle to latest version.'
+inputs:
+  stage:
+    description: >-
+      The expected stage of the release. Might be current,
+      release-candidate, release-nightly or nightly.
+    required: true
+runs:
+  using: 'node12'
+  main: 'index.js'

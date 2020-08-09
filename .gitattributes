@@ -10,3 +10,4 @@
 
 # Do not show diff for locked dependencies
 /gradle.lockfile -diff
+/.github/actions/package-lock.json -diff

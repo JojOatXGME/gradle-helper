@@ -8,6 +8,9 @@
 !/.idea/inspectionProfiles
 /out/
 
+# npm
+/.github/actions/node_modules/
+
 # Vim
 .*.sw[nop]
 

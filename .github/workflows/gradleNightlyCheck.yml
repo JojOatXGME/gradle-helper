@@ -1,0 +1,46 @@
+name: Gradle Nightly Check
+
+on:
+  schedule:
+  - cron: '0 14 * * 2'
+  workflow_dispatch:
+    inputs: {}
+
+jobs:
+  build:
+
+    name: "Build and test project"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        stage: [release-candidate, release-nightly, nightly]
+
+    steps:
+    # Setup environment
+    - uses: actions/checkout@v2
+    - uses: JojOatXGME/prepare-local-actions@v1
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    # Update gradle
+    - name: Update Gradle
+      uses: ./.github/actions/updateGradle
+      with:
+        stage: ${{ matrix.stage }}
+    # Build
+    - name: Build with Gradle
+      run: ./gradlew projectReport build
+    # Upload build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts
+        path: build/libs/
+    - name: Upload build reports
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-reports
+        path: build/reports/
