@@ -1,6 +1,7 @@
 name: Gradle Nightly Check
 
 on:
+  push: {}
   schedule:
   - cron: '0 14 * * 2'
   workflow_dispatch:
@@ -19,7 +20,7 @@ jobs:
     steps:
     # Setup environment
     - uses: actions/checkout@v2
-    - uses: JojOatXGME/prepare-local-actions@v1
+    - uses: JojOatXGME/prepare-local-actions@fix_reserve_cache_warning
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
