@@ -6,6 +6,10 @@ inputs:
       The expected stage of the release. Might be current,
       release-candidate, release-nightly or nightly.
     required: true
+outputs:
+  update_successful:
+    description: >-
+      Is set if the update was successful, unset otherwise.
 runs:
   using: 'node12'
   main: 'index.js'
