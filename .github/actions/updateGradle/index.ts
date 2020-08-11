@@ -13,6 +13,10 @@ async function main() {
         `Fetch the latest version of stage ‘${stage}’`,
         () => fetchLatestVersion(stage));
 
+    if (latestVersion == null) {
+        core.error(`There is currently no up-to-date version on stage ‘${stage}’`);
+        return;
+    }
     if (latestVersion.broken) {
         core.warning(`Version ‘${latestVersion.version}’ is marked as broken`);
     }
@@ -20,20 +24,22 @@ async function main() {
     await core.group(
         `Update Gradle to version ‘${latestVersion.version}’`,
         () => updateGradle(latestVersion.version));
+    core.setOutput('update_successful', true);
 }
 
-async function fetchLatestVersion(stage: string): Promise<VersionInfo> {
+async function fetchLatestVersion(stage: string): Promise<VersionInfo|null> {
     const latestVersion =
         await fetch(`https://services.gradle.org/versions/${stage}`)
             .then(response => response.json());
 
     const prettyJson = JSON.stringify(latestVersion, null, 2);
     core.info(`Fetched version: ${prettyJson}`);
-    if (typeof latestVersion.version !== "string" ||
-        typeof latestVersion.broken !== "boolean") {
-        throw new Error("Invalid format");
+    if (typeof latestVersion.version !== "string") {
+        return null;
     }
-
+    if (typeof latestVersion.broken !== "boolean") {
+        latestVersion.broken = false;
+    }
     return latestVersion;
 }
 
