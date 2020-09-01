@@ -45,7 +45,6 @@ test {
 
 dependencyLocking {
     lockAllConfigurations()
-    lockMode = LockMode.STRICT
 }
 
 task resolveAndLockAll {
