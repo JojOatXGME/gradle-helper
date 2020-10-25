@@ -18,8 +18,10 @@ jobs:
 
     steps:
     # Setup environment
-    - uses: actions/checkout@v2
-    - uses: JojOatXGME/prepare-local-actions@v1
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Prepare local actions
+      uses: JojOatXGME/prepare-local-actions@v1
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:

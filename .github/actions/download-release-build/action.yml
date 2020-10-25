@@ -1,0 +1,19 @@
+name: 'Download release build'
+description: 'Download release build from pull request'
+inputs:
+  pull_request:
+    description: The pull request containing the release build
+    required: false
+    default: "${{ github.event_name == 'workflow_dispatch' && \
+      github.event.inputs.pull_request || \
+      github.event.pull_request.number }}"
+  token:
+    description: Secret GitHub API token which is used for API requests
+    required: false
+    default: ${{ github.token }}
+outputs:
+  var_*:
+    description: Arbitrary data which was given when the release build was uploaded
+runs:
+  using: 'node12'
+  main: 'index.js'

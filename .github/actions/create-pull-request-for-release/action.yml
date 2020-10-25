@@ -1,0 +1,35 @@
+name: 'Create pull request for release'
+description: 'Create pull request and upload release build'
+inputs:
+  name:
+    description: Name for the created pull request
+    required: true
+  label:
+    description: Labels (one per line) which are set on the created pull request
+    required: true
+  assignee:
+    description: Users (one per line) which get assigned to the pull request
+    required: false
+    default: ${{ github.actor }}
+  token:
+    description: Secret GitHub API token which is used for API requests
+    required: false
+    default: ${{ github.token }}
+  target_branch:
+    description: Target branch for the created pull request
+    required: false
+    default: ${{ github.ref }}
+  include:
+    description: Files and directories (one per line) which shall be uploaded
+    required: false
+    default: '.'
+  exclude:
+    description: Files and directories (one per line) which shall be excluded
+    required: false
+    default: ''
+  var_*:
+    description: Arbitrary data which will be available later in the release process
+    required: false
+runs:
+  using: 'node12'
+  main: 'index.js'
